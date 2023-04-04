@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong</title>
+    <style>
+        *{
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body >
+ 
+  <div style="display: flex; justify-content: center; align-items: center;">
+  
+    <canvas >
+         </canvas>
+  </div>
+        
+        <script>
+          const canvasEl = document.querySelector('canvas'),
+          canvasCtx = canvasEl.getContext('2d'),
+          gapY = 10
+          var paddleX = 20
+          
+      canvasEl.addEventListener('mousemove', function(e){
+        let mousePos = calculateMousePos(e)
+        paddleX = mousePos.x
+        // console.log(mousePos.x)
+      })
+
+            const field = {
+                width: 400,
+                height: 600,
+                draw: function(){
+                     canvasCtx.fillStyle = '#286047'
+                canvasCtx.fillRect(0,0,this.width,this.height)
+                }
+            }
+
+            const line = {
+                width: field.width,
+                height: 15,
+                draw: function(){
+                    canvasCtx.fillStyle = '#ffffff'
+                canvasCtx.fillRect(0,(field.height/2 - this.height/2) -15,this.width,this.height)
+                }
+            }
+
+            const topPaddle = {
+               x:field.width/2,
+               y: gapY,
+               width: 140,
+               speed: 4,
+               height:  line.height,
+               
+               _move: function(){
+    
+                this.x += this.speed
+               if(this.x >= field.width -this.width/2 || this.x <= this.width/2){
+this.speed *= -1 
+
+  
+}
+
+                // const randomNum = Math.floor(Math.random() * (106))
+                // const limite = 100
+              
+                // if(randomNum <= limite)
+                //   this.x += ball.speedX 
+                // else 
+                //   this.x += -ball.speedX 
+             
+                
+               },
+               draw: function(){
+                canvasCtx.fillStyle = '#ffffff'
+                canvasCtx.fillRect(this.x - this.width/2, this.y, this.width, this.height)
+                this._move()
+               }
+            }
+            const bottomPaddle = {
+               x: paddleX,
+               y: field.height - line.height - gapY,
+               width: 140,
+               height: line.height,
+               
+               _move: function(){
+                if(paddleX <= field.width -this.width/2 +10 && paddleX >= this.width/2){
+
+                  this.x = paddleX
+                }
+                },
+                draw: function(){
+                 canvasCtx.fillStyle = '#ffffff'
+                 canvasCtx.fillRect(this.x - this.width/2, this.y, this.width, this.height)
+                 this._move()
+                },
+              }
+
+            const ball ={
+                x: field.width/2,
+               y: field.height/2,
+               r: 10,
+               speedX: 5,
+               speedY: 5,
+               _move: function (){
+                this.x +=  this.speedX
+                this.y += this.speedY
+                if(this.x === field.width - this.r || this.x === this.r){
+                  this.speedX = -this.speedX
+                }
+                if(this.y === field.height - this.r ){
+                  console.log("ponto do inimigo")
+                  this.x = field.width/2
+                  this.y = field.height/2
+                }
+                if(this.y === this.r){
+                  console.log("ponto do jogador")
+                  this.x = field.width/2
+                  this.y = field.height/2
+                  this.speedX *= -1
+                  this.speedY *= -1
+                }
+
+                if(this.y === bottomPaddle.y - this.r && (this.x >= bottomPaddle.x - bottomPaddle.width/2 && this.x <= bottomPaddle.x + bottomPaddle.width/2)){
+                this.speedY = -this.speedY}
+                if(this.y === topPaddle.y + this.r && (this.x >= topPaddle.x - topPaddle.width/2 && this.x <= topPaddle.x + topPaddle.width/2)){
+                this.speedY = -this.speedY}
+               }
+               ,
+               draw: function(){
+                canvasCtx.fillStyle = '#ffffff'
+                canvasCtx.beginPath()
+                canvasCtx.arc(this.x,this.y, this.r, 0, 2* Math.PI, false )
+                canvasCtx.fill()
+                this._move()
+               }
+            }
+            function setup() {
+               canvasEl.width = canvasCtx.width = window.innerWidth
+               canvasEl.height = canvasCtx.height  = window.innerHeight 
+            }
+
+
+            function draw(){
+                //Campo
+                field.draw()
+                //Linha central
+              line.draw()
+                //Raquete de cima
+               topPaddle.draw()
+                //Raquete de baiixo
+              bottomPaddle.draw()
+                //Bola 
+                ball.draw()
+              
+
+
+
+            }
+
+            function calculateMousePos(event) {
+  let rect = canvasEl.getBoundingClientRect();
+  let root = document.documentElement;
+  let mouseX = event.clientX - rect.left - root.scrollLeft;
+  let mouseY = event.clientY - rect.top - root.scrollTop;
+
+  return {
+    x: mouseX,
+    y: mouseY
+  }
+}
+
+      
+
+            window.animateFrame = (function () {
+        return (
+          window.requestAnimationFrame ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame ||
+          window.oRequestAnimationFrame ||
+          window.msRequestAnimationFrame ||
+          function (callback) {
+            return window.setTimeout(callback, 1000 / 60)
+          }
+        )
+      })()
+
+      function main() {
+        animateFrame(main)
+        draw()
+        
+      }
+      setup()
+      main()
+        </script>
+   
+</body>
+</html>
