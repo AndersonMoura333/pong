@@ -26,10 +26,22 @@
           canvasCtx = canvasEl.getContext('2d'),
           gapY = 10
           var paddleX = 20
+          var gameOver = false
           
       canvasEl.addEventListener('mousemove', function(e){
         let mousePos = calculateMousePos(e)
         paddleX = mousePos.x
+        // console.log(mousePos.x)
+      })
+      canvasEl.addEventListener('mousedown', function(e){
+        if(gameOver){
+
+          placar.pontosInimigo = 0
+          placar.pontosJogador = 0
+          gameOver = false
+          ball.x = field.height/2
+          ball.y = field.width/2
+        }
         // console.log(mousePos.x)
       })
 
@@ -115,11 +127,14 @@ this.speed *= -1
                   this.speedX = -this.speedX
                 }
                 if(this.y === field.height - this.r ){
+                  placar.update("inimigo")
                   console.log("ponto do inimigo")
                   this.x = field.width/2
                   this.y = field.height/2
+                  
                 }
                 if(this.y === this.r){
+                  placar.update("jogador")
                   console.log("ponto do jogador")
                   this.x = field.width/2
                   this.y = field.height/2
@@ -141,6 +156,36 @@ this.speed *= -1
                 this._move()
                }
             }
+
+            const placar = {
+              pontosInimigo: 0,
+              pontosJogador: 0,
+              update: function(player){
+                switch (player) {
+                  case "jogador":
+                    this.pontosJogador++  
+                    if(this.pontosJogador === 4){
+                      gameOver = true
+                    }
+                    break;
+                  case "inimigo": 
+                    this.pontosInimigo++
+                    if(this.pontosInimigo === 4){
+                      gameOver = true
+                    }
+                  default:
+                    break;
+                }
+              },
+              draw: function (){
+                canvasCtx.fillStyle = '#ffffff'
+                canvasCtx.font = "35px serif"
+                canvasCtx.fillText(this.pontosJogador.toString(), field.width - 30, (field.height) - field.height/4)
+                canvasCtx.fillText(this.pontosInimigo.toString(), field.width - 30, field.height/4)
+              }
+            }
+
+            
             function setup() {
                canvasEl.width = canvasCtx.width = window.innerWidth
                canvasEl.height = canvasCtx.height  = window.innerHeight 
@@ -158,6 +203,8 @@ this.speed *= -1
               bottomPaddle.draw()
                 //Bola 
                 ball.draw()
+
+                placar.draw()
               
 
 
@@ -191,9 +238,31 @@ this.speed *= -1
         )
       })()
 
+      function gameOverAndResert(){
+        if(placar.pontosInimigo === 4){
+          canvasCtx.font = "35px serif"
+          canvasCtx.fillText("Inimigo venceu", field.width/2 - 100, field.height/2 + 40)
+          canvasCtx.font = "15px serif"
+          canvasCtx.fillText("clique para reiniciar", field.width/2 - 60, field.height/2 + 70)
+        }else{
+          canvasCtx.font = "35px serif"
+          canvasCtx.fillText("Jogador venceu", field.width/2 - 100, field.height/2 + 40)
+          canvasCtx.font = "15px serif"
+          canvasCtx.fillText("clique para reiniciar", field.width/2 - 60, field.height/2 + 70)
+          
+        }
+        
+      }
+
       function main() {
+
         animateFrame(main)
-        draw()
+        if(!gameOver){
+
+          draw()
+        }else{
+          gameOverAndResert()
+        } 
         
       }
       setup()
